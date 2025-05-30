@@ -6,6 +6,7 @@ import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { FarmModule } from './component/farm/farm.module';
 import { VendorModule } from './component/vendor/vendor.module';
+import { OrderModule } from './component/order/order.module';
 
 @Module({
   imports: [
@@ -22,6 +23,7 @@ import { VendorModule } from './component/vendor/vendor.module';
     AuthModule,
     FarmModule,
     VendorModule,
+    OrderModule,
   ],
   controllers: [AppController],
   providers: [AppService],
