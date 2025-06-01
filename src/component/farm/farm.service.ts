@@ -15,11 +15,11 @@ export class FarmService {
   }
 
   async findAll(): Promise<Farm[]> {
-    return this.farmModel.find().populate('category').populate('farmer').exec();
+    return this.farmModel.find().populate('category').populate('farm').exec();
   }
 
   async findOne(id: string): Promise<Farm> {
-    const farm = await this.farmModel.findById(id).populate('category').populate('farmer').exec();
+    const farm = await this.farmModel.findById(id).populate('category').populate('farm').exec();
     if (!farm) {
       throw new NotFoundException(`Farm with ID ${id} not found`);
     }

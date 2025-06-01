@@ -7,6 +7,7 @@ import { AuthModule } from './auth/auth.module';
 import { FarmModule } from './component/farm/farm.module';
 import { VendorModule } from './component/vendor/vendor.module';
 import { OrderModule } from './component/order/order.module';
+import { CategoryModule } from './component/component/category/category.module';
 
 @Module({
   imports: [
@@ -24,6 +25,7 @@ import { OrderModule } from './component/order/order.module';
     FarmModule,
     VendorModule,
     OrderModule,
+    CategoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

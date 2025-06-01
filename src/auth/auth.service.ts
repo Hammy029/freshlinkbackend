@@ -48,24 +48,34 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-    const { email, password } = loginDto;
+  const { email, password } = loginDto;
 
-    const normalizedEmail = email.toLowerCase();
-    const user = await this.userModel.findOne({ email: normalizedEmail });
-    if (!user) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const isPasswordValid = await bcrypt.compare(password, user.password);
-    if (!isPasswordValid) {
-      throw new UnauthorizedException('Invalid credentials');
-    }
-
-    const payload = { sub: user._id, email: user.email, role: user.role };
-    const access_token = this.jwtService.sign(payload);
-
-    return { access_token };
+  const normalizedEmail = email.toLowerCase();
+  const user = await this.userModel.findOne({ email: normalizedEmail });
+  if (!user) {
+    throw new UnauthorizedException('Invalid credentials');
   }
+
+  const isPasswordValid = await bcrypt.compare(password, user.password);
+  if (!isPasswordValid) {
+    throw new UnauthorizedException('Invalid credentials');
+  }
+
+  const payload = { sub: user._id, email: user.email, role: user.role };
+  const access_token = this.jwtService.sign(payload);
+
+  return {
+    access_token,
+    user: {
+      _id: user._id,
+      username: user.username,
+      email: user.email,
+      role: user.role,
+      phone_no: user.phone_no,
+    },
+  };
+}
+
 
   // ✅ Google login with auto-register for Gmail users
   async googleLogin(user: any) {

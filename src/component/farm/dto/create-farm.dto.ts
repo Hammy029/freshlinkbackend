@@ -1,4 +1,10 @@
-import { IsString, IsNotEmpty, IsNumber, IsOptional, IsMongoId } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsMongoId
+} from 'class-validator';
 
 export class CreateFarmDto {
   @IsString()
@@ -23,5 +29,9 @@ export class CreateFarmDto {
 
   @IsMongoId()
   @IsNotEmpty()
-  farmer: string;
+  farm: string; // ID of the User or Farmer posting the product
+
+  @IsString()
+  @IsOptional()
+  status?: string; // Optional status field
 }
