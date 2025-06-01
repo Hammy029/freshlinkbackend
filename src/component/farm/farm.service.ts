@@ -29,6 +29,8 @@ export class FarmService {
   async update(id: string, updateFarmDto: UpdateFarmDto): Promise<Farm> {
     const updatedFarm = await this.farmModel
       .findByIdAndUpdate(id, updateFarmDto, { new: true })
+      .populate('category')
+      .populate('farm')
       .exec();
     if (!updatedFarm) {
       throw new NotFoundException(`Farm with ID ${id} not found`);
@@ -42,5 +44,23 @@ export class FarmService {
       throw new NotFoundException(`Farm with ID ${id} not found`);
     }
     return deletedFarm;
+  }
+
+  // ✅ Mark a product as Sold (with full populated return)
+  async markAsSold(id: string): Promise<Farm> {
+    const updated = await this.farmModel.findByIdAndUpdate(
+      id,
+      { status: 'Sold' },
+      { new: true }
+    )
+    .populate('category')
+    .populate('farm')
+    .exec();
+
+    if (!updated) {
+      throw new NotFoundException(`Farm product with ID ${id} not found`);
+    }
+
+    return updated;
   }
 }

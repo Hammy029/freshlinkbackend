@@ -3,7 +3,8 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
-  IsMongoId
+  IsMongoId,
+  IsIn,
 } from 'class-validator';
 
 export class CreateFarmDto {
@@ -33,5 +34,6 @@ export class CreateFarmDto {
 
   @IsString()
   @IsOptional()
-  status?: string; // Optional status field
+  @IsIn(['Available', 'Sold'])
+  status?: 'Available' | 'Sold'; // Optional status field with allowed values
 }
