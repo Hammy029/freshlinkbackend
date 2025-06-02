@@ -9,6 +9,7 @@ import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { User, UserSchema } from './entities/auth.schema';
 import { GoogleStrategy } from './strategies/google.strategy';
+import { JwtStrategy } from './strategies/jwt.strategy';  // <-- Import JwtStrategy
 
 @Module({
   imports: [
@@ -25,7 +26,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
     PassportModule.register({ defaultStrategy: 'jwt' }), // Add PassportModule for auth strategies
   ],
   controllers: [AuthController],
-  providers: [AuthService, GoogleStrategy], // Add GoogleStrategy provider
+  providers: [AuthService, GoogleStrategy, JwtStrategy], // <-- Added JwtStrategy here
   exports: [AuthService],
 })
 export class AuthModule {}

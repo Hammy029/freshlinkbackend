@@ -24,8 +24,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
       secretOrKey: secretKey,
     });
   }
+
   async validate(payload: JwtPayload) {
-    // This returns the decoded user info, available as req.user
-    return { userId: payload.sub, email: payload.email, role: payload.role };
+    // Fix: Use _id instead of userId to match controller/service expectations
+    return { _id: payload.sub, email: payload.email, role: payload.role };
   }
 }

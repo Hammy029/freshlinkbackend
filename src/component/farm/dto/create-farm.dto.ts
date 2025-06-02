@@ -28,9 +28,10 @@ export class CreateFarmDto {
   @IsNotEmpty()
   category: string;
 
+  // Made optional because assigned on backend (from req.user._id)
   @IsMongoId()
-  @IsNotEmpty()
-  farm: string; // ID of the User or Farmer posting the product
+  @IsOptional()
+  farm?: string; // ID of the User or Farmer posting the product
 
   @IsString()
   @IsOptional()
