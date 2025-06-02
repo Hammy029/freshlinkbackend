@@ -24,8 +24,8 @@ export class FarmService {
     return this.farmModel.find().populate('category').populate('farm').exec();
   }
 
-  // New: Get all available farm products (status != 'Sold') for users
-  async findAllAvailable(): Promise<Farm[]> {
+  // New: Get all available farm products (status != 'Sold') for public UI
+  async findAllPublic(): Promise<Farm[]> {
     return this.farmModel
       .find({ status: { $ne: 'Sold' } })
       .populate('category')

@@ -10,6 +10,6 @@ import { Farm, FarmSchema } from './entities/farm.schema';
   ],
   controllers: [FarmController],
   providers: [FarmService],
-  exports: [FarmService],  // <-- Export FarmService so it can be used in other modules
+  exports: [FarmService],  // <--- Add this line to export the FarmService
 })
 export class FarmModule {}
