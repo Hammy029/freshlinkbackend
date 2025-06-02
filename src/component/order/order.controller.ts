@@ -19,13 +19,14 @@ import { Request } from 'express';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  // Protect this route, get vendor ID from JWT payload
+  // Create order, vendorId from JWT
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request & { user: any }) {
     const vendorId = req.user['_id'];
     return this.orderService.create({ ...createOrderDto, vendor: vendorId });
   }
+
   @Get()
   findAll() {
     return this.orderService.findAll();
@@ -49,7 +50,15 @@ export class OrderController {
   // Get all orders for logged-in vendor
   @UseGuards(JwtAuthGuard)
   @Get('my-orders')
-  findMyOrders(@Req() req: Request & { user: any }) {
+  findOrdersByVendor(@Req() req: Request & { user: any }) {
     const vendorId = req.user['_id'];
     return this.orderService.findByVendor(vendorId);
-  }}
+  }
+
+  // Optional: Notify farmer manually (if implemented in service)
+  @UseGuards(JwtAuthGuard)
+  @Post(':id/notify-farmer')
+  notifyFarmer(@Param('id') id: string) {
+    return this.orderService.notifyFarmerOfOrder(id);
+  }
+}
