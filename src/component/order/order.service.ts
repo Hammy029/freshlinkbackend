@@ -12,21 +12,20 @@ export class OrderService {
   ) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
-    // Add default values here
     const createdOrder = new this.orderModel({
       ...createOrderDto,
-      status: 'pending',       // default status
-      orderDate: new Date(),   // set current date/time
+      status: 'pending',
+      orderDate: new Date(),
     });
     return createdOrder.save();
   }
 
   async findAll(): Promise<Order[]> {
-    return this.orderModel.find().exec();
+    return this.orderModel.find().populate('product').exec();
   }
 
   async findOne(id: string): Promise<Order> {
-    const order = await this.orderModel.findById(id).exec();
+    const order = await this.orderModel.findById(id).populate('product').exec();
     if (!order) {
       throw new NotFoundException(`Order with id ${id} not found`);
     }
@@ -34,11 +33,9 @@ export class OrderService {
   }
 
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
-    const updatedOrder = await this.orderModel.findByIdAndUpdate(
-      id,
-      updateOrderDto,
-      { new: true },
-    ).exec();
+    const updatedOrder = await this.orderModel
+      .findByIdAndUpdate(id, updateOrderDto, { new: true })
+      .exec();
 
     if (!updatedOrder) {
       throw new NotFoundException(`Order with id ${id} not found`);
@@ -52,5 +49,13 @@ export class OrderService {
       throw new NotFoundException(`Order with id ${id} not found`);
     }
     return deletedOrder;
+  }
+
+  // New method: get all orders by vendorId
+  async findByVendor(vendorId: string): Promise<Order[]> {
+    return this.orderModel
+      .find({ vendor: vendorId })
+      .populate('product')  // Populate the farm product details
+      .exec();
   }
 }

@@ -1,17 +1,31 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { Request } from 'express';
 
 @Controller('order')
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
+  // Protect this route, get vendor ID from JWT payload
+  @UseGuards(JwtAuthGuard)
   @Post()
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.orderService.create(createOrderDto);
+  create(@Body() createOrderDto: CreateOrderDto, @Req() req: Request & { user: any }) {
+    const vendorId = req.user['_id'];
+    return this.orderService.create({ ...createOrderDto, vendor: vendorId });
   }
-
   @Get()
   findAll() {
     return this.orderService.findAll();
@@ -31,4 +45,11 @@ export class OrderController {
   remove(@Param('id') id: string) {
     return this.orderService.remove(id);
   }
-}
+
+  // Get all orders for logged-in vendor
+  @UseGuards(JwtAuthGuard)
+  @Get('my-orders')
+  findMyOrders(@Req() req: Request & { user: any }) {
+    const vendorId = req.user['_id'];
+    return this.orderService.findByVendor(vendorId);
+  }}

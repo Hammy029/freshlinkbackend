@@ -24,6 +24,15 @@ export class FarmService {
     return this.farmModel.find().populate('category').populate('farm').exec();
   }
 
+  // New: Get all available farm products (status != 'Sold') for users
+  async findAllAvailable(): Promise<Farm[]> {
+    return this.farmModel
+      .find({ status: { $ne: 'Sold' } })
+      .populate('category')
+      .populate('farm')
+      .exec();
+  }
+
   // Get a single farm product by ID
   async findOne(id: string): Promise<Farm> {
     const farm = await this.farmModel
@@ -66,13 +75,14 @@ export class FarmService {
       .populate('category')
       .populate('farm')
       .exec();
-      
+
     if (!updatedFarm) {
       throw new NotFoundException(`Farm with ID ${id} not found`);
     }
 
     return updatedFarm;
   }
+
   // Delete only if owner or admin
   async remove(id: string, user: any): Promise<Farm> {
     const farm = await this.farmModel.findById(id);
@@ -90,6 +100,7 @@ export class FarmService {
     }
     return deletedFarm;
   }
+
   // Mark product as sold
   async markAsSold(id: string): Promise<Farm> {
     const updated = await this.farmModel

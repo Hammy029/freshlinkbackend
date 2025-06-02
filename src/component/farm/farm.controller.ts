@@ -14,19 +14,24 @@ import {
 import { FarmService } from './farm.service';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
-//import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { RolesGuard } from 'src/auth/guards/roles.guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { Role } from 'src/auth/roles.enum';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
-//import { Role } from 'src/auth/auth.schema';
 
 @Controller('farm')
-@UseGuards(JwtAuthGuard, RolesGuard)
 export class FarmController {
   constructor(private readonly farmService: FarmService) {}
 
-  // 👨‍🌾 User: Create product
+  // Public: View all available products (no auth required)
+  @Get()
+  findAllAvailable() {
+    return this.farmService.findAllAvailable();
+  }
+
+  // Protected endpoints below:
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Post()
   @Roles(Role.User)
   @HttpCode(HttpStatus.CREATED)
@@ -34,27 +39,27 @@ export class FarmController {
     return this.farmService.create({ ...createFarmDto, farm: req.user._id });
   }
 
-  // 👑 Admin: View all products
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('admin-products')
   @Roles(Role.Admin)
   findAll() {
     return this.farmService.findAll();
   }
 
-  // 👨‍🌾 User: View own products
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Get('my-products')
   @Roles(Role.User)
   getMyProducts(@Req() req) {
     return this.farmService.findByUser(req.user._id);
   }
 
-  // 🔍 Anyone authenticated: Get product by ID
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.farmService.findOne(id);
   }
 
-  // ✏️ Admin or owner: Update
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id')
   @Roles(Role.User, Role.Admin)
   update(
@@ -65,14 +70,14 @@ export class FarmController {
     return this.farmService.update(id, updateFarmDto, req.user);
   }
 
-  // ✅ Admin or owner: Mark as sold
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id/sold')
   @Roles(Role.User, Role.Admin)
   markAsSold(@Param('id') id: string) {
     return this.farmService.markAsSold(id);
   }
 
-  // 🗑️ Admin or owner: Delete
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
   @Roles(Role.User, Role.Admin)
   @HttpCode(HttpStatus.NO_CONTENT)
