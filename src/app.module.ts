@@ -8,6 +8,7 @@ import { FarmModule } from './component/farm/farm.module';
 import { VendorModule } from './component/vendor/vendor.module';
 import { OrderModule } from './component/order/order.module';
 import { CategoryModule } from './component/component/category/category.module';
+import { MpesaApiModule } from './mpesa/mpesa-api/mpesa-api.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { CategoryModule } from './component/component/category/category.module';
     VendorModule,
     OrderModule,
     CategoryModule,
+    MpesaApiModule,
   ],
   controllers: [AppController],
   providers: [AppService],
