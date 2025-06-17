@@ -30,12 +30,12 @@ export class FarmService {
 
   // ✅ RAW ALL: For /farm/raw-all route
   async getRawAllFarms(): Promise<Farm[]> {
-    return this.findAll(); // You could use farmModel.find() if you want no population
+    return this.findAll(); // Or customize if needed
   }
 
-  // ✅ ADMIN ALIAS for Angular Service `getAllFarmsAsAdmin`
+  // ✅ ADMIN ALIAS for Angular Service
   async getAllFarmsAsAdmin(): Promise<Farm[]> {
-    return this.findAll(); // or keep separate logic if needed
+    return this.findAll();
   }
 
   // ✅ PUBLIC: Get only available products (not sold)
@@ -45,6 +45,11 @@ export class FarmService {
       .populate('category')
       .populate('farm')
       .exec();
+  }
+
+  // ✅ Optional alias for Angular call
+  async getAvailableProductsPublic(): Promise<Farm[]> {
+    return this.findAllPublic();
   }
 
   // ✅ SINGLE PRODUCT by ID

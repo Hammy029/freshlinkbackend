@@ -18,13 +18,13 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 export class FarmController {
   constructor(private readonly farmService: FarmService) {}
 
-  // ✅ Public: Get all available products
-  @Get()
+  // ✅ Public: Get all available products (for non-authenticated users)
+  @Get('public')
   findAllPublic() {
     return this.farmService.findAllPublic();
   }
 
-  // ✅ Authenticated: Create a farm product (linked to user)
+  // ✅ Authenticated: Create a farm product (linked to current user)
   @UseGuards(JwtAuthGuard)
   @Post()
   create(@Body() createFarmDto: CreateFarmDto, @Req() req) {
@@ -38,7 +38,7 @@ export class FarmController {
     return this.farmService.findAll();
   }
 
-  // ✅ Admin: Get raw DB data (for testing or backend inspection)
+  // ✅ Admin: Get raw DB data (for backend inspection)
   @UseGuards(JwtAuthGuard)
   @Get('raw-all')
   getRawAllFarms(@Req() req) {
@@ -52,28 +52,28 @@ export class FarmController {
     return this.farmService.findByUser(req.user._id);
   }
 
-  // ✅ Any Authenticated User: Get farm by ID
+  // ✅ Any Authenticated User: Get product by ID
   @UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id') id: string) {
     return this.farmService.findOne(id);
   }
 
-  // ✅ Authenticated User: Update product (owns it or admin)
+  // ✅ Authenticated User: Update product (owner or admin)
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateFarmDto: UpdateFarmDto, @Req() req) {
     return this.farmService.update(id, updateFarmDto, req.user);
   }
 
-  // ✅ Authenticated User: Mark as sold (owns it or admin)
+  // ✅ Authenticated User: Mark product as sold (owner or admin)
   @UseGuards(JwtAuthGuard)
   @Patch(':id/sold')
   markAsSold(@Param('id') id: string, @Req() req) {
     return this.farmService.markAsSold(id);
   }
 
-  // ✅ Authenticated User: Delete product (owns it or admin)
+  // ✅ Authenticated User: Delete product (owner or admin)
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   remove(@Param('id') id: string, @Req() req) {
