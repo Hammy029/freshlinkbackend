@@ -6,90 +6,77 @@ import {
   Patch,
   Param,
   Delete,
-  HttpCode,
-  HttpStatus,
-  UseGuards,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { FarmService } from './farm.service';
 import { CreateFarmDto } from './dto/create-farm.dto';
 import { UpdateFarmDto } from './dto/update-farm.dto';
-import { RolesGuard } from 'src/auth/guards/roles.guard';
-import { Roles } from 'src/auth/decorators/roles.decorator';
-import { Role } from 'src/auth/roles.enum';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 
 @Controller('farm')
 export class FarmController {
   constructor(private readonly farmService: FarmService) {}
 
-  // === PUBLIC ROUTE - No auth required ===
+  // ✅ Public: Get all available products
   @Get()
-  @HttpCode(HttpStatus.OK)
-  async findAllPublic() {
-    // This method returns all products visible to the public (e.g., only not sold products)
+  findAllPublic() {
     return this.farmService.findAllPublic();
   }
 
-  // === AUTHENTICATED ROUTES ===
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // ✅ Authenticated: Create a farm product (linked to user)
+  @UseGuards(JwtAuthGuard)
   @Post()
-  @Roles(Role.User, Role.Admin) // Allow both roles
-  @HttpCode(HttpStatus.CREATED)
   create(@Body() createFarmDto: CreateFarmDto, @Req() req) {
-    console.log('Create farm by user role:', req.user.role);
     return this.farmService.create({ ...createFarmDto, farm: req.user._id });
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // ✅ Admin: Get all products (assumes frontend filters admin role)
+  @UseGuards(JwtAuthGuard)
   @Get('admin-products')
-  @Roles(Role.Admin)
   findAll(@Req() req) {
-    console.log('Find all by user role:', req.user.role);
     return this.farmService.findAll();
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // ✅ Admin: Get raw DB data (for testing or backend inspection)
+  @UseGuards(JwtAuthGuard)
+  @Get('raw-all')
+  getRawAllFarms(@Req() req) {
+    return this.farmService.findAll();
+  }
+
+  // ✅ Authenticated User: Get own products
+  @UseGuards(JwtAuthGuard)
   @Get('my-products')
-  @Roles(Role.User)
   getMyProducts(@Req() req) {
-    console.log('Get my products by user role:', req.user.role);
     return this.farmService.findByUser(req.user._id);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // ✅ Any Authenticated User: Get farm by ID
+  @UseGuards(JwtAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: string, @Req() req) {
-    console.log('Find one product requested by user role:', req.user.role);
+  findOne(@Param('id') id: string) {
     return this.farmService.findOne(id);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // ✅ Authenticated User: Update product (owns it or admin)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id')
-  @Roles(Role.User, Role.Admin)
-  update(
-    @Param('id') id: string,
-    @Body() updateFarmDto: UpdateFarmDto,
-    @Req() req,
-  ) {
-    console.log('Update product by user role:', req.user.role);
+  update(@Param('id') id: string, @Body() updateFarmDto: UpdateFarmDto, @Req() req) {
     return this.farmService.update(id, updateFarmDto, req.user);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // ✅ Authenticated User: Mark as sold (owns it or admin)
+  @UseGuards(JwtAuthGuard)
   @Patch(':id/sold')
-  @Roles(Role.User, Role.Admin)
   markAsSold(@Param('id') id: string, @Req() req) {
-    console.log('Mark as sold by user role:', req.user.role);
     return this.farmService.markAsSold(id);
   }
 
-  @UseGuards(JwtAuthGuard, RolesGuard)
+  // ✅ Authenticated User: Delete product (owns it or admin)
+  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  @Roles(Role.User, Role.Admin)
-  @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @Req() req) {
-    console.log('Delete product by user role:', req.user.role);
     return this.farmService.remove(id, req.user);
   }
 }
