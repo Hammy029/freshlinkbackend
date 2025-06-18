@@ -45,12 +45,16 @@ export class OrderService {
       }
     }
 
+    // ✅ Only pass product ID and quantity, matching the schema
+    const formattedItems = items.map(item => ({
+      product: item.productId,
+      quantity: item.quantity,
+    }));
+
     const newOrder = new this.orderModel({
-      userId,
-      items,
-      grandTotal,
-      status: 'pending',
-      orderDate: new Date(),
+      userId: userId,
+      items: formattedItems,
+      totalAmount: grandTotal,
     });
 
     const savedOrder = await newOrder.save();
@@ -60,13 +64,11 @@ export class OrderService {
     });
 
     return savedOrder;
-  }
-
-  async findAll(): Promise<Order[]> {
+  }  async findAll(): Promise<Order[]> {
     return this.orderModel
       .find()
       .populate('userId')
-      .populate('items.productId')
+      .populate('items.product')
       .exec();
   }
 
@@ -74,7 +76,7 @@ export class OrderService {
     const order = await this.orderModel
       .findById(id)
       .populate('userId')
-      .populate('items.productId')
+      .populate('items.product')
       .exec();
 
     if (!order) {
@@ -110,18 +112,17 @@ export class OrderService {
     return this.orderModel
       .find({ userId: vendorId })
       .populate('userId')
-      .populate('items.productId')
+      .populate('items.product')
       .exec();
   }
 
   async notifyFarmerOfOrder(id: string) {
     const order = await this.findOne(id);
 
-    // Optional: Extract all farmer contacts from order items
-    const productIds = order.items.map(i => i.productId);
+    const productIds = order.items.map(i => i.product);
     this.logger.log(`Notify farmers for order ${id} - Products: ${productIds}`);
 
-    // Trigger notification logic here (e.g., via event, SMS, email...)
+    // Mock notification logic (e.g., emit SMS/email event here)
     return {
       message: 'Notification logic executed (mock)',
       orderId: id,

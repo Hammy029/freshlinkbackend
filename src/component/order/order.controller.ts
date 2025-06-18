@@ -19,38 +19,48 @@ import { Request } from 'express';
 export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
-  // ✅ Create new order with vendor auto-attached from logged-in user
+  /**
+   * ✅ Create a new order — user ID is extracted from JWT
+   */
   @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Body() createOrderDto: CreateOrderDto,
     @Req() req: Request & { user: any },
   ) {
-    const vendorId = req.user._id;
-    return this.orderService.create({ ...createOrderDto, userId: vendorId });
+    const userId = req.user._id;
+    return this.orderService.create({ ...createOrderDto, userId });
   }
 
-  // ✅ Get all orders - for admin use or dashboard aggregation
+  /**
+   * ✅ Admin: Get all orders (with user & product population)
+   */
   @Get()
   async findAll() {
     return this.orderService.findAll();
   }
 
-  // ✅ Get all orders for logged-in user (vendor or customer)
+  /**
+   * ✅ Authenticated user: Get only their orders
+   */
   @UseGuards(JwtAuthGuard)
   @Get('my-orders')
   async findOrdersByVendor(@Req() req: Request & { user: any }) {
-    const vendorId = req.user._id;
-    return this.orderService.findByVendor(vendorId);
+    const userId = req.user._id;
+    return this.orderService.findByVendor(userId);
   }
 
-  // ✅ Get single order by ID
+  /**
+   * ✅ Public/guarded single order fetch (optionally admin-only in future)
+   */
   @Get(':id')
   async findOne(@Param('id') id: string) {
     return this.orderService.findOne(id);
   }
 
-  // ✅ Update order by ID - guarded
+  /**
+   * ✅ Update an order — optionally validate ownership/admin
+   */
   @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
@@ -58,19 +68,22 @@ export class OrderController {
     @Body() updateOrderDto: UpdateOrderDto,
     @Req() req: Request & { user: any },
   ) {
-    // Optional: verify user ownership or admin privileges here
+    // Optionally: check user role or order ownership here
     return this.orderService.update(id, updateOrderDto);
   }
 
-  // ✅ Delete order by ID - guarded
+  /**
+   * ✅ Delete an order — optionally validate ownership/admin
+   */
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string, @Req() req: Request & { user: any }) {
-    // Optional: verify user ownership or admin privileges here
     return this.orderService.remove(id);
   }
 
-  // ✅ Custom route: notify farmer of order (optional logic in service)
+  /**
+   * ✅ Custom: Notify farmer(s) after an order is placed
+   */
   @UseGuards(JwtAuthGuard)
   @Post(':id/notify-farmer')
   async notifyFarmer(@Param('id') id: string) {

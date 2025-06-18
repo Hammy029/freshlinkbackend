@@ -6,6 +6,7 @@ import {
   ValidateNested,
   Min,
   IsString,
+  IsOptional,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -37,8 +38,8 @@ class OrderItemDto {
 
 export class CreateOrderDto {
   @IsMongoId()
-  @IsNotEmpty()
-  userId: string;
+  @IsOptional() // ✅ allow it to be injected manually
+  userId?: string;
 
   @IsArray()
   @ValidateNested({ each: true })

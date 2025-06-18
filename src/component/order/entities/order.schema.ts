@@ -15,7 +15,6 @@ export class Order {
     },
   ])
   items: {
-    productId: any;
     product: Types.ObjectId;
     quantity: number;
   }[];
