@@ -1,19 +1,51 @@
-// src/component/order/dto/create-order.dto.ts
+import {
+  IsArray,
+  IsMongoId,
+  IsNotEmpty,
+  IsNumber,
+  ValidateNested,
+  Min,
+  IsString,
+} from 'class-validator';
+import { Type } from 'class-transformer';
 
-import { IsNotEmpty, IsMongoId, IsNumber, Min, IsOptional, IsString } from 'class-validator';
+class OrderItemDto {
+  @IsMongoId()
+  @IsNotEmpty()
+  productId: string;
 
-export class CreateOrderDto {
-  @IsMongoId({ message: 'Invalid vendor ID' })
-  vendor: string;
+  @IsString()
+  @IsNotEmpty()
+  title: string;
 
-  @IsMongoId({ message: 'Invalid product ID' })
-  product: string;
+  @IsNumber()
+  @Min(0)
+  price: number;
 
-  @IsNumber({}, { message: 'Quantity must be a number' })
-  @Min(1, { message: 'Quantity must be at least 1' })
+  @IsNumber()
+  @Min(1)
   quantity: number;
 
-  @IsOptional()
-  @IsString()
-  notes?: string; // Optional note from vendor to farmer
+  @IsNumber()
+  @Min(0)
+  total: number;
+
+  @IsNumber()
+  @Min(0)
+  availableQuantity: number;
+}
+
+export class CreateOrderDto {
+  @IsMongoId()
+  @IsNotEmpty()
+  userId: string;
+
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => OrderItemDto)
+  items: OrderItemDto[];
+
+  @IsNumber()
+  @Min(0)
+  grandTotal: number;
 }
