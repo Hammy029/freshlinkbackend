@@ -51,7 +51,7 @@ export class OrderService {
     }));
 
     const newOrder = new this.orderModel({
-      userId: userId,
+      userId,
       items: formattedItems,
       totalAmount: grandTotal,
     });
@@ -71,8 +71,17 @@ export class OrderService {
   async findAll(): Promise<Order[]> {
     return this.orderModel
       .find()
-      .populate('userId')
-      .populate('items.product')
+      .populate({
+        path: 'items.product',
+        populate: [
+          { path: 'farm', model: 'User', select: 'name email phoneNumber' },
+          { path: 'category', model: 'Category', select: 'name' },
+        ],
+      })
+      .populate({
+        path: 'userId',
+        select: 'name email phoneNumber',
+      })
       .exec();
   }
 
@@ -82,8 +91,17 @@ export class OrderService {
   async findOne(id: string): Promise<Order> {
     const order = await this.orderModel
       .findById(id)
-      .populate('userId')
-      .populate('items.product')
+      .populate({
+        path: 'items.product',
+        populate: [
+          { path: 'farm', model: 'User', select: 'name email phoneNumber' },
+          { path: 'category', model: 'Category', select: 'name' },
+        ],
+      })
+      .populate({
+        path: 'userId',
+        select: 'name email phoneNumber',
+      })
       .exec();
 
     if (!order) {
@@ -127,8 +145,17 @@ export class OrderService {
   async findByVendor(vendorId: string): Promise<Order[]> {
     return this.orderModel
       .find({ userId: vendorId })
-      .populate('userId')
-      .populate('items.product')
+      .populate({
+        path: 'items.product',
+        populate: [
+          { path: 'farm', model: 'User', select: 'name email phoneNumber' },
+          { path: 'category', model: 'Category', select: 'name' },
+        ],
+      })
+      .populate({
+        path: 'userId',
+        select: 'name email phoneNumber',
+      })
       .exec();
   }
 
@@ -140,25 +167,24 @@ export class OrderService {
       .find()
       .populate({
         path: 'items.product',
-        populate: {
-          path: 'farm',
-          model: 'Farm',
-          populate: {
-            path: 'owner',
-            model: 'User',
-          },
-        },
+        populate: [
+          { path: 'farm', model: 'User', select: 'name email phoneNumber' },
+          { path: 'category', model: 'Category', select: 'name' },
+        ],
       })
-      .populate('userId')
+      .populate({
+        path: 'userId',
+        select: 'name email phoneNumber',
+      })
       .exec();
 
-    // Only return orders where any item.product.farm.owner matches farmerId
-    const filteredOrders = orders.filter(order =>
+    // Filter: Only include orders for products owned by this farmer
+    return orders.filter(order =>
       order.items.some(
-        item => (item.product as any)?.farm?.owner?._id?.toString() === farmerId      )
+        item =>
+          (item.product as any)?.farm?._id?.toString() === farmerId,
+      ),
     );
-
-    return filteredOrders;
   }
 
   /**
