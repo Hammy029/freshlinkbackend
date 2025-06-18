@@ -24,13 +24,16 @@ export class FarmService {
     return this.farmModel
       .find()
       .populate('category')
-      .populate('farm')
+      .populate({
+        path: 'farm',
+        select: 'username email phone_no',
+      })
       .exec();
   }
 
   // ✅ RAW ALL: For /farm/raw-all route
   async getRawAllFarms(): Promise<Farm[]> {
-    return this.findAll(); // Or customize if needed
+    return this.findAll();
   }
 
   // ✅ ADMIN ALIAS for Angular Service
@@ -43,7 +46,10 @@ export class FarmService {
     return this.farmModel
       .find({ status: { $ne: 'Sold' } })
       .populate('category')
-      .populate('farm')
+      .populate({
+        path: 'farm',
+        select: 'username email phone_no',
+      })
       .exec();
   }
 
@@ -57,7 +63,10 @@ export class FarmService {
     const farm = await this.farmModel
       .findById(id)
       .populate('category')
-      .populate('farm')
+      .populate({
+        path: 'farm',
+        select: 'username email phone_no',
+      })
       .exec();
     if (!farm) {
       throw new NotFoundException(`Farm with ID ${id} not found`);
@@ -70,7 +79,10 @@ export class FarmService {
     return this.farmModel
       .find({ farm: userId })
       .populate('category')
-      .populate('farm')
+      .populate({
+        path: 'farm',
+        select: 'username email phone_no',
+      })
       .exec();
   }
 
@@ -92,7 +104,10 @@ export class FarmService {
     const updatedFarm = await this.farmModel
       .findByIdAndUpdate(id, updateFarmDto, { new: true })
       .populate('category')
-      .populate('farm')
+      .populate({
+        path: 'farm',
+        select: 'username email phone_no',
+      })
       .exec();
 
     if (!updatedFarm) {
@@ -126,7 +141,10 @@ export class FarmService {
     const updated = await this.farmModel
       .findByIdAndUpdate(id, { status: 'Sold' }, { new: true })
       .populate('category')
-      .populate('farm')
+      .populate({
+        path: 'farm',
+        select: 'username email phone_no',
+      })
       .exec();
 
     if (!updated) {
@@ -134,5 +152,23 @@ export class FarmService {
     }
 
     return updated;
+  }
+
+  // ✅ NEW: Search by Product ID and get poster's contact
+  async findProductWithOwner(id: string): Promise<Farm> {
+    const product = await this.farmModel
+      .findById(id)
+      .populate('category')
+      .populate({
+        path: 'farm',
+        select: 'username email phone_no',
+      })
+      .exec();
+
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    return product;
   }
 }
