@@ -23,7 +23,7 @@ export class OrderService {
   ) {}
 
   /**
-   * Handles creation of an order from the frontend cart
+   * ✅ Create a new order from frontend cart
    */
   async create(createOrderDto: CreateOrderDto): Promise<Order> {
     const { items, userId, grandTotal } = createOrderDto;
@@ -40,12 +40,11 @@ export class OrderService {
 
       if (item.quantity > product.quantity) {
         throw new BadRequestException(
-          `Quantity for ${item.title} exceeds available stock`
+          `Quantity for ${item.title} exceeds available stock`,
         );
       }
     }
 
-    // ✅ Only pass product ID and quantity, matching the schema
     const formattedItems = items.map(item => ({
       product: item.productId,
       quantity: item.quantity,
@@ -64,7 +63,12 @@ export class OrderService {
     });
 
     return savedOrder;
-  }  async findAll(): Promise<Order[]> {
+  }
+
+  /**
+   * ✅ Get all orders (admin)
+   */
+  async findAll(): Promise<Order[]> {
     return this.orderModel
       .find()
       .populate('userId')
@@ -72,6 +76,9 @@ export class OrderService {
       .exec();
   }
 
+  /**
+   * ✅ Get one order by ID
+   */
   async findOne(id: string): Promise<Order> {
     const order = await this.orderModel
       .findById(id)
@@ -86,6 +93,9 @@ export class OrderService {
     return order;
   }
 
+  /**
+   * ✅ Update order
+   */
   async update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order> {
     const updatedOrder = await this.orderModel
       .findByIdAndUpdate(id, updateOrderDto, { new: true })
@@ -98,6 +108,9 @@ export class OrderService {
     return updatedOrder;
   }
 
+  /**
+   * ✅ Delete order
+   */
   async remove(id: string): Promise<Order> {
     const deletedOrder = await this.orderModel.findByIdAndDelete(id).exec();
 
@@ -108,6 +121,9 @@ export class OrderService {
     return deletedOrder;
   }
 
+  /**
+   * ✅ User's own orders
+   */
   async findByVendor(vendorId: string): Promise<Order[]> {
     return this.orderModel
       .find({ userId: vendorId })
@@ -116,13 +132,45 @@ export class OrderService {
       .exec();
   }
 
+  /**
+   * ✅ Farmer: View orders placed on their products
+   */
+  async findOrdersForFarmer(farmerId: string): Promise<Order[]> {
+    const orders = await this.orderModel
+      .find()
+      .populate({
+        path: 'items.product',
+        populate: {
+          path: 'farm',
+          model: 'Farm',
+          populate: {
+            path: 'owner',
+            model: 'User',
+          },
+        },
+      })
+      .populate('userId')
+      .exec();
+
+    // Only return orders where any item.product.farm.owner matches farmerId
+    const filteredOrders = orders.filter(order =>
+      order.items.some(
+        item => (item.product as any)?.farm?.owner?._id?.toString() === farmerId      )
+    );
+
+    return filteredOrders;
+  }
+
+  /**
+   * ✅ Notify farmers of new order (mock)
+   */
   async notifyFarmerOfOrder(id: string) {
     const order = await this.findOne(id);
 
     const productIds = order.items.map(i => i.product);
     this.logger.log(`Notify farmers for order ${id} - Products: ${productIds}`);
 
-    // Mock notification logic (e.g., emit SMS/email event here)
+    // TODO: Emit event to notification service or send SMS/email
     return {
       message: 'Notification logic executed (mock)',
       orderId: id,

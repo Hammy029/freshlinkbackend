@@ -51,7 +51,17 @@ export class OrderController {
   }
 
   /**
-   * ✅ Public/guarded single order fetch (optionally admin-only in future)
+   * ✅ Farmer: View orders placed on products posted by this farmer
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('farmer-orders')
+  async getFarmerOrders(@Req() req: Request & { user: any }) {
+    const farmerId = req.user._id;
+    return this.orderService.findOrdersForFarmer(farmerId);
+  }
+
+  /**
+   * ✅ Public/guarded single order fetch
    */
   @Get(':id')
   async findOne(@Param('id') id: string) {
@@ -68,7 +78,6 @@ export class OrderController {
     @Body() updateOrderDto: UpdateOrderDto,
     @Req() req: Request & { user: any },
   ) {
-    // Optionally: check user role or order ownership here
     return this.orderService.update(id, updateOrderDto);
   }
 

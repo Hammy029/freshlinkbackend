@@ -10,7 +10,7 @@ export class Order {
 
   @Prop([
     {
-      product: { type: Types.ObjectId, ref: 'Product', required: true },
+      product: { type: Types.ObjectId, ref: 'Farm', required: true }, // ✅ Updated from 'Product' to 'Farm'
       quantity: { type: Number, required: true },
     },
   ])

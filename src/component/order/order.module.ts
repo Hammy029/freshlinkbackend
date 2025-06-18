@@ -10,7 +10,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
   imports: [
     MongooseModule.forFeature([{ name: Order.name, schema: OrderSchema }]),
     FarmModule,
-    EventEmitterModule.forRoot(),  // <- add this line
+    EventEmitterModule.forRoot(), // Event emitter for notifications
   ],
   controllers: [OrderController],
   providers: [OrderService],
