@@ -74,13 +74,22 @@ export class OrderService {
       .populate({
         path: 'items.product',
         populate: [
-          { path: 'farm', model: 'User', select: 'name email phoneNumber' },
-          { path: 'category', model: 'Category', select: 'name' },
+          {
+            path: 'farm',
+            model: 'User',
+            select: 'username email phone_no',
+          },
+          {
+            path: 'category',
+            model: 'Category',
+            select: 'name',
+          },
         ],
+        select: 'name price category farm', // 🟢 ensure 'name' is returned
       })
       .populate({
         path: 'userId',
-        select: 'name email phoneNumber',
+        select: 'username email phone_no',
       })
       .exec();
   }
@@ -94,13 +103,22 @@ export class OrderService {
       .populate({
         path: 'items.product',
         populate: [
-          { path: 'farm', model: 'User', select: 'name email phoneNumber' },
-          { path: 'category', model: 'Category', select: 'name' },
+          {
+            path: 'farm',
+            model: 'User',
+            select: 'username email phone_no',
+          },
+          {
+            path: 'category',
+            model: 'Category',
+            select: 'name',
+          },
         ],
+        select: 'name price category farm',
       })
       .populate({
         path: 'userId',
-        select: 'name email phoneNumber',
+        select: 'username email phone_no',
       })
       .exec();
 
@@ -148,13 +166,22 @@ export class OrderService {
       .populate({
         path: 'items.product',
         populate: [
-          { path: 'farm', model: 'User', select: 'name email phoneNumber' },
-          { path: 'category', model: 'Category', select: 'name' },
+          {
+            path: 'farm',
+            model: 'User',
+            select: 'username email phone_no',
+          },
+          {
+            path: 'category',
+            model: 'Category',
+            select: 'name',
+          },
         ],
+        select: 'name price category farm',
       })
       .populate({
         path: 'userId',
-        select: 'name email phoneNumber',
+        select: 'username email phone_no',
       })
       .exec();
   }
@@ -168,13 +195,22 @@ export class OrderService {
       .populate({
         path: 'items.product',
         populate: [
-          { path: 'farm', model: 'User', select: 'name email phoneNumber' },
-          { path: 'category', model: 'Category', select: 'name' },
+          {
+            path: 'farm',
+            model: 'User',
+            select: 'username email phone_no',
+          },
+          {
+            path: 'category',
+            model: 'Category',
+            select: 'name',
+          },
         ],
+        select: 'name price category farm',
       })
       .populate({
         path: 'userId',
-        select: 'name email phoneNumber',
+        select: 'username email phone_no',
       })
       .exec();
 
