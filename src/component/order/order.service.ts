@@ -85,7 +85,7 @@ export class OrderService {
             select: 'name',
           },
         ],
-        select: 'title price category farm', // 🟢 ensure 'name' is returned
+        select: 'title price category farm',
       })
       .populate({
         path: 'userId',
@@ -148,11 +148,16 @@ export class OrderService {
    * ✅ Delete order
    */
   async remove(id: string): Promise<Order> {
+    this.logger.warn(`Attempting to delete order with ID: ${id}`);
+
     const deletedOrder = await this.orderModel.findByIdAndDelete(id).exec();
 
     if (!deletedOrder) {
+      this.logger.error(`Order with ID ${id} not found`);
       throw new NotFoundException(`Order with id ${id} not found`);
     }
+
+    this.logger.log(`Order with ID ${id} successfully deleted`);
 
     return deletedOrder;
   }
@@ -214,7 +219,6 @@ export class OrderService {
       })
       .exec();
 
-    // Filter: Only include orders for products owned by this farmer
     return orders.filter(order =>
       order.items.some(
         item =>
@@ -232,7 +236,6 @@ export class OrderService {
     const productIds = order.items.map(i => i.product);
     this.logger.log(`Notify farmers for order ${id} - Products: ${productIds}`);
 
-    // TODO: Emit event to notification service or send SMS/email
     return {
       message: 'Notification logic executed (mock)',
       orderId: id,

@@ -8,6 +8,7 @@ import {
   Delete,
   UseGuards,
   Req,
+  Logger,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -17,6 +18,8 @@ import { Request } from 'express';
 
 @Controller('order')
 export class OrderController {
+  private readonly logger = new Logger(OrderController.name);
+
   constructor(private readonly orderService: OrderService) {}
 
   /**
@@ -82,16 +85,17 @@ export class OrderController {
   }
 
   /**
-   * ✅ Delete an order — optionally validate ownership/admin
+   * ✅ Cancel/Delete an order
    */
   @UseGuards(JwtAuthGuard)
   @Delete(':id')
   async remove(@Param('id') id: string, @Req() req: Request & { user: any }) {
+    this.logger.warn(`Cancel requested for order ID: ${id} by user: ${req.user._id}`);
     return this.orderService.remove(id);
   }
 
   /**
-   * ✅ Custom: Notify farmer(s) after an order is placed
+   * ✅ Notify farmer(s) after an order is placed
    */
   @UseGuards(JwtAuthGuard)
   @Post(':id/notify-farmer')
