@@ -95,7 +95,21 @@ export class OrderController {
   }
 
   /**
-   * ✅ Notify farmer(s) after an order is placed
+   * ✅ Remove a product from an order (new feature)
+   */
+  @UseGuards(JwtAuthGuard)
+  @Patch(':orderId/remove-item/:productId')
+  async removeItemFromOrder(
+    @Param('orderId') orderId: string,
+    @Param('productId') productId: string,
+    @Req() req: Request & { user: any },
+  ) {
+    this.logger.log(`User ${req.user._id} removing product ${productId} from order ${orderId}`);
+    return this.orderService.removeProductFromOrder(orderId, productId);
+  }
+
+  /**
+   * ✅ Custom: Notify farmer(s) after an order is placed
    */
   @UseGuards(JwtAuthGuard)
   @Post(':id/notify-farmer')

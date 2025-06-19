@@ -241,4 +241,48 @@ export class OrderService {
       orderId: id,
     };
   }
+
+  /**
+   * ✅ Remove a product from an order
+   */
+  async removeProductFromOrder(orderId: string, productId: string): Promise<Order> {
+    const order = await this.orderModel.findById(orderId).exec();
+
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+
+    const filteredItems = order.items.filter(
+      item => item.product.toString() !== productId,
+    );
+
+    if (filteredItems.length === order.items.length) {
+      throw new NotFoundException(`Product ${productId} not found in order`);
+    }
+
+    order.items = filteredItems;
+
+    // Recalculate total
+    let newTotal = 0;
+    for (const item of filteredItems) {
+      const product = await this.farmService.findOne(item.product.toString());
+      newTotal += product.price * item.quantity;
+    }
+
+    order.totalAmount = newTotal;
+
+    const updatedOrder = await order.save();
+    this.logger.log(`Removed product ${productId} from order ${orderId}`);
+
+    return updatedOrder.populate([
+      {
+        path: 'items.product',
+        populate: [
+          { path: 'farm', model: 'User', select: 'username email phone_no' },
+          { path: 'category', model: 'Category', select: 'name' },
+        ],
+      },
+      { path: 'userId', select: 'username email phone_no' },
+    ]);
+  }
 }
