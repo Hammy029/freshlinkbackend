@@ -85,7 +85,7 @@ export class OrderService {
             select: 'name',
           },
         ],
-        select: 'name price category farm', // 🟢 ensure 'name' is returned
+        select: 'title price category farm', // 🟢 ensure 'name' is returned
       })
       .populate({
         path: 'userId',
@@ -114,7 +114,7 @@ export class OrderService {
             select: 'name',
           },
         ],
-        select: 'name price category farm',
+        select: 'title price category farm',
       })
       .populate({
         path: 'userId',
@@ -177,7 +177,7 @@ export class OrderService {
             select: 'name',
           },
         ],
-        select: 'name price category farm',
+        select: 'title price category farm',
       })
       .populate({
         path: 'userId',
@@ -206,7 +206,7 @@ export class OrderService {
             select: 'name',
           },
         ],
-        select: 'name price category farm',
+        select: 'title price category farm',
       })
       .populate({
         path: 'userId',
