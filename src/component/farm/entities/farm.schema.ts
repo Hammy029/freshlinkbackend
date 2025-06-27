@@ -18,11 +18,15 @@ export class Farm extends Document {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'Category', required: true })
   category: MongooseSchema.Types.ObjectId;
 
-  // ✅ Make sure this refers to the correct related collection (User)
+  // ✅ Reference to User collection
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
   farm: MongooseSchema.Types.ObjectId;
 
-  // Added status to persist product availability
+  // ✅ Optional image URL for the product
+  @Prop()
+  imageUrl: string;
+
+  // ✅ Status field to track availability
   @Prop({ default: 'Available' })
   status: 'Available' | 'Sold';
 

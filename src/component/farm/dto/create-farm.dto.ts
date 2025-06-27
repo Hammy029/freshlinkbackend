@@ -5,6 +5,7 @@ import {
   IsOptional,
   IsMongoId,
   IsIn,
+  IsUrl,
 } from 'class-validator';
 
 export class CreateFarmDto {
@@ -28,13 +29,17 @@ export class CreateFarmDto {
   @IsNotEmpty()
   category: string;
 
-  // Made optional because assigned on backend (from req.user._id)
+  // Automatically attached on backend from req.user._id
   @IsMongoId()
   @IsOptional()
-  farm?: string; // ID of the User or Farmer posting the product
+  farm?: string;
 
   @IsString()
   @IsOptional()
   @IsIn(['Available', 'Sold'])
-  status?: 'Available' | 'Sold'; // Optional status field with allowed values
+  status?: 'Available' | 'Sold';
+
+  @IsUrl()
+  @IsOptional()
+  imageUrl?: string;
 }
