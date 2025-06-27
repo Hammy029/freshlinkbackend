@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   ForbiddenException,
+  BadRequestException,
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
@@ -170,5 +171,25 @@ export class FarmService {
     }
 
     return product;
+  }
+
+  // ✅ NEW: Reduce quantity after adding to cart
+  async reduceQuantity(id: string, quantityToDeduct: number): Promise<Farm> {
+    const product = await this.farmModel.findById(id);
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${id} not found`);
+    }
+
+    if (product.quantity < quantityToDeduct) {
+      throw new BadRequestException('Not enough quantity available');
+    }
+
+    product.quantity -= quantityToDeduct;
+    const updated = await product.save();
+
+    return (await updated.populate('category')).populate({
+      path: 'farm',
+      select: 'username email phone_no',
+    });
   }
 }

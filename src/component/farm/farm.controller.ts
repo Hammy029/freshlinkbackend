@@ -76,4 +76,13 @@ export class FarmController {
   getProductWithOwner(@Param('id') id: string) {
     return this.farmService.findProductWithOwner(id);
   }
+
+  // ✅ Public: Reduce quantity after adding to cart
+  @Patch(':id/reduce-quantity')
+  reduceQuantity(
+    @Param('id') id: string,
+    @Body() body: { quantity: number }
+  ) {
+    return this.farmService.reduceQuantity(id, body.quantity);
+  }
 }
