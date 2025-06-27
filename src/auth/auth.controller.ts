@@ -49,7 +49,7 @@ export class AuthController {
     console.log('Token generated:', tokenData);
 
     // Redirect to frontend with token
-    res.redirect(`http://localhost:4200/login?token=${tokenData.access_token}`);
+    res.redirect(`http://localhost:4200/google-callback?token=${tokenData.access_token}`);
   }
 
   @Post('forgot-password')
