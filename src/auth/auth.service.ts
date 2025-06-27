@@ -1,5 +1,3 @@
-// src/auth/auth.service.ts
-
 import {
   Injectable,
   ConflictException,
@@ -40,7 +38,7 @@ export class AuthService {
       email: normalizedEmail,
       phone_no,
       password: hashedPassword,
-      role: 'user', // default role
+      role: 'user',
     });
 
     await newUser.save();
@@ -48,36 +46,34 @@ export class AuthService {
   }
 
   async login(loginDto: LoginDto) {
-  const { email, password } = loginDto;
+    const { email, password } = loginDto;
 
-  const normalizedEmail = email.toLowerCase();
-  const user = await this.userModel.findOne({ email: normalizedEmail });
-  if (!user) {
-    throw new UnauthorizedException('Invalid credentials');
+    const normalizedEmail = email.toLowerCase();
+    const user = await this.userModel.findOne({ email: normalizedEmail });
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    const payload = { sub: user._id, email: user.email, role: user.role };
+    const access_token = this.jwtService.sign(payload);
+
+    return {
+      access_token,
+      user: {
+        _id: user._id,
+        username: user.username,
+        email: user.email,
+        role: user.role,
+        phone_no: user.phone_no,
+      },
+    };
   }
 
-  const isPasswordValid = await bcrypt.compare(password, user.password);
-  if (!isPasswordValid) {
-    throw new UnauthorizedException('Invalid credentials');
-  }
-
-  const payload = { sub: user._id, email: user.email, role: user.role };
-  const access_token = this.jwtService.sign(payload);
-
-  return {
-    access_token,
-    user: {
-      _id: user._id,
-      username: user.username,
-      email: user.email,
-      role: user.role,
-      phone_no: user.phone_no,
-    },
-  };
-}
-
-
-  // ✅ Google login with auto-register for Gmail users
   async googleLogin(user: any) {
     if (!user || !user.email) {
       throw new UnauthorizedException('No user data from Google');
@@ -85,7 +81,6 @@ export class AuthService {
 
     const normalizedEmail = user.email.toLowerCase();
 
-    // ✅ Allow only Gmail addresses
     if (!normalizedEmail.endsWith('@gmail.com')) {
       throw new UnauthorizedException('Only Gmail accounts are allowed');
     }
@@ -93,12 +88,11 @@ export class AuthService {
     let existingUser = await this.userModel.findOne({ email: normalizedEmail });
 
     if (!existingUser) {
-      // ✅ Auto-register new Gmail user
       existingUser = new this.userModel({
         username: user.displayName || normalizedEmail.split('@')[0],
         email: normalizedEmail,
-        password: null, // no password for Google login
-        phone_no: null, // optional field
+        password: null,
+        phone_no: null,
         role: 'user',
       });
 
@@ -134,7 +128,6 @@ export class AuthService {
     const normalizedEmail = email.toLowerCase();
     const user = await this.userModel.findOne({ email: normalizedEmail });
 
-    // Prevent email enumeration
     if (!user) {
       return { message: 'If that email exists, a reset link has been sent' };
     }
@@ -195,6 +188,10 @@ export class AuthService {
 
   async findAll() {
     return await this.userModel.find().exec();
+  }
+
+  async findAllUsers() {
+    return await this.userModel.find().select('-password').exec();
   }
 
   async findOne(id: number) {

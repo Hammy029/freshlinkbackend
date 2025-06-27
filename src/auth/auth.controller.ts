@@ -76,4 +76,10 @@ export class AuthController {
   getProfile(@Request() req) {
     return req.user;
   }
+
+  // ✅ NEW: Get all users (excluding passwords)
+  @Get('user')
+  async getAllUsers() {
+    return this.authService.findAllUsers();
+  }
 }
