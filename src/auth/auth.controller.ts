@@ -7,6 +7,9 @@ import {
   Request,
   Patch,
   Res,
+  Param,
+  Delete,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
@@ -32,23 +35,16 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
-  // Initiate Google OAuth login flow
   @Get('google')
   @UseGuards(AuthGuard('google'))
   async googleAuth(@Request() req) {
     // Handled by Passport Google strategy
   }
 
-  // Handle Google OAuth callback
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleAuthCallback(@Request() req, @Res() res: Response) {
-    console.log('Google OAuth callback hit, user:', req.user);
-
     const tokenData = await this.authService.googleLogin(req.user);
-    console.log('Token generated:', tokenData);
-
-    // Redirect to frontend with token
     res.redirect(`http://localhost:4200/google-callback?token=${tokenData.access_token}`);
   }
 
@@ -77,9 +73,27 @@ export class AuthController {
     return req.user;
   }
 
-  // ✅ NEW: Get all users (excluding passwords)
+  // ✅ Get all users (excluding passwords)
   @Get('user')
   async getAllUsers() {
     return this.authService.findAllUsers();
+  }
+
+  // ✅ Update user by ID
+  @Patch('user/:id')
+  async updateUser(@Param('id') id: string, @Body() updateUserDto: any) {
+    if (!id) {
+      throw new BadRequestException('User ID is required');
+    }
+    return this.authService.update(id, updateUserDto);
+  }
+
+  // ✅ Delete user by ID
+  @Delete('user/:id')
+  async deleteUser(@Param('id') id: string) {
+    if (!id) {
+      throw new BadRequestException('User ID is required');
+    }
+    return this.authService.remove(id);
   }
 }
