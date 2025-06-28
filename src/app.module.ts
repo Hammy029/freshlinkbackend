@@ -5,7 +5,6 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { FarmModule } from './component/farm/farm.module';
-import { VendorModule } from './component/vendor/vendor.module';
 import { OrderModule } from './component/order/order.module';
 import { CategoryModule } from './component/component/category/category.module';
 import { CartModule } from './component/cart/cart.module';
@@ -24,7 +23,6 @@ import { CartModule } from './component/cart/cart.module';
     }),
     AuthModule,
     FarmModule,
-    VendorModule,
     OrderModule,
     CategoryModule,
     CartModule,
