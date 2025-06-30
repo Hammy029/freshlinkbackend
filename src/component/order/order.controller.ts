@@ -6,14 +6,12 @@ import {
   Patch,
   Param,
   Delete,
-  UseGuards,
   Req,
   Logger,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { Request } from 'express';
 
 @Controller('order')
@@ -23,15 +21,14 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   /**
-   * ✅ Create a new order — user ID is extracted from JWT
+   * ✅ Create a new order — now expects userId from CreateOrderDto body
    */
-  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Body() createOrderDto: CreateOrderDto,
-    @Req() req: Request & { user: any },
+    @Req() req: Request,
   ) {
-    const userId = req.user._id;
+    const userId = createOrderDto.userId;
     return this.orderService.create({ ...createOrderDto, userId });
   }
 
@@ -44,27 +41,25 @@ export class OrderController {
   }
 
   /**
-   * ✅ Authenticated user: Get only their orders
+   * ✅ Unprotected: Get orders by userId query param
    */
-  @UseGuards(JwtAuthGuard)
   @Get('my-orders')
-  async findOrdersByVendor(@Req() req: Request & { user: any }) {
-    const userId = req.user._id;
+  async findOrdersByVendor(@Req() req: Request) {
+    const userId = req.query.userId as string;
     return this.orderService.findByVendor(userId);
   }
 
   /**
-   * ✅ Farmer: View orders placed on products posted by this farmer
+   * ✅ Unprotected: View orders placed on products posted by this farmer
    */
-  @UseGuards(JwtAuthGuard)
   @Get('farmer-orders')
-  async getFarmerOrders(@Req() req: Request & { user: any }) {
-    const farmerId = req.user._id;
+  async getFarmerOrders(@Req() req: Request) {
+    const farmerId = req.query.farmerId as string;
     return this.orderService.findOrdersForFarmer(farmerId);
   }
 
   /**
-   * ✅ Public/guarded single order fetch
+   * ✅ Public single order fetch
    */
   @Get(':id')
   async findOne(@Param('id') id: string) {
@@ -72,46 +67,42 @@ export class OrderController {
   }
 
   /**
-   * ✅ Update an order — optionally validate ownership/admin
+   * ✅ Update an order — now public
    */
-  @UseGuards(JwtAuthGuard)
   @Patch(':id')
   async update(
     @Param('id') id: string,
     @Body() updateOrderDto: UpdateOrderDto,
-    @Req() req: Request & { user: any },
+    @Req() req: Request,
   ) {
     return this.orderService.update(id, updateOrderDto);
   }
 
   /**
-   * ✅ Cancel/Delete an order
+   * ✅ Cancel/Delete an order — now public
    */
-  @UseGuards(JwtAuthGuard)
   @Delete(':id')
-  async remove(@Param('id') id: string, @Req() req: Request & { user: any }) {
-    this.logger.warn(`Cancel requested for order ID: ${id} by user: ${req.user._id}`);
+  async remove(@Param('id') id: string, @Req() req: Request) {
+    this.logger.warn(`Cancel requested for order ID: ${id}`);
     return this.orderService.remove(id);
   }
 
   /**
-   * ✅ Remove a product from an order (new feature)
+   * ✅ Remove a product from an order (now unprotected)
    */
-  @UseGuards(JwtAuthGuard)
   @Patch(':orderId/remove-item/:productId')
   async removeItemFromOrder(
     @Param('orderId') orderId: string,
     @Param('productId') productId: string,
-    @Req() req: Request & { user: any },
+    @Req() req: Request,
   ) {
-    this.logger.log(`User ${req.user._id} removing product ${productId} from order ${orderId}`);
+    this.logger.log(`Removing product ${productId} from order ${orderId}`);
     return this.orderService.removeProductFromOrder(orderId, productId);
   }
 
   /**
-   * ✅ Custom: Notify farmer(s) after an order is placed
+   * ✅ Notify farmer(s) after an order is placed (now public)
    */
-  @UseGuards(JwtAuthGuard)
   @Post(':id/notify-farmer')
   async notifyFarmer(@Param('id') id: string) {
     return this.orderService.notifyFarmerOfOrder(id);
