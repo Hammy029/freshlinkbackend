@@ -8,11 +8,14 @@ import {
   Delete,
   Req,
   Logger,
+  UseGuards,
 } from '@nestjs/common';
 import { OrderService } from './order.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { Request } from 'express';
+import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+//import { JwtAuthGuard } from '../auth/jwt-auth.guard'; // ✅ Adjust path if needed
 
 @Controller('order')
 export class OrderController {
@@ -21,14 +24,15 @@ export class OrderController {
   constructor(private readonly orderService: OrderService) {}
 
   /**
-   * ✅ Create a new order — now expects userId from CreateOrderDto body
+   * ✅ Protected: Create a new order — gets userId from token, not body
    */
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(
     @Body() createOrderDto: CreateOrderDto,
-    @Req() req: Request,
+    @Req() req: any,
   ) {
-    const userId = createOrderDto.userId;
+    const userId = req.user._id; // ✅ secure from JWT
     return this.orderService.create({ ...createOrderDto, userId });
   }
 
@@ -41,11 +45,12 @@ export class OrderController {
   }
 
   /**
-   * ✅ Unprotected: Get orders by userId query param
+   * ✅ Protected: Get orders for currently authenticated user
    */
+  @UseGuards(JwtAuthGuard)
   @Get('my-orders')
-  async findOrdersByVendor(@Req() req: Request) {
-    const userId = req.query.userId as string;
+  async findOrdersByVendor(@Req() req: any) {
+    const userId = req.user._id;
     return this.orderService.findByVendor(userId);
   }
 
@@ -67,7 +72,7 @@ export class OrderController {
   }
 
   /**
-   * ✅ Update an order — now public
+   * ✅ Update an order — still public (optionally protect later)
    */
   @Patch(':id')
   async update(
@@ -79,7 +84,7 @@ export class OrderController {
   }
 
   /**
-   * ✅ Cancel/Delete an order — now public
+   * ✅ Cancel/Delete an order — still public (optionally protect later)
    */
   @Delete(':id')
   async remove(@Param('id') id: string, @Req() req: Request) {
@@ -88,7 +93,7 @@ export class OrderController {
   }
 
   /**
-   * ✅ Remove a product from an order (now unprotected)
+   * ✅ Remove a product from an order (unprotected)
    */
   @Patch(':orderId/remove-item/:productId')
   async removeItemFromOrder(
