@@ -45,7 +45,7 @@ export class OrderService {
       }
     }
 
-    const formattedItems = items.map(item => ({
+    const formattedItems = items.map((item) => ({
       product: item.productId,
       quantity: item.quantity,
     }));
@@ -219,10 +219,9 @@ export class OrderService {
       })
       .exec();
 
-    return orders.filter(order =>
+    return orders.filter((order) =>
       order.items.some(
-        item =>
-          (item.product as any)?.farm?._id?.toString() === farmerId,
+        (item) => (item.product as any)?.farm?._id?.toString() === farmerId,
       ),
     );
   }
@@ -233,7 +232,7 @@ export class OrderService {
   async notifyFarmerOfOrder(id: string) {
     const order = await this.findOne(id);
 
-    const productIds = order.items.map(i => i.product);
+    const productIds = order.items.map((i) => i.product);
     this.logger.log(`Notify farmers for order ${id} - Products: ${productIds}`);
 
     return {
@@ -245,7 +244,10 @@ export class OrderService {
   /**
    * ✅ Remove a product from an order
    */
-  async removeProductFromOrder(orderId: string, productId: string): Promise<Order> {
+  async removeProductFromOrder(
+    orderId: string,
+    productId: string,
+  ): Promise<Order> {
     const order = await this.orderModel.findById(orderId).exec();
 
     if (!order) {
@@ -253,7 +255,7 @@ export class OrderService {
     }
 
     const filteredItems = order.items.filter(
-      item => item.product.toString() !== productId,
+      (item) => item.product.toString() !== productId,
     );
 
     if (filteredItems.length === order.items.length) {
